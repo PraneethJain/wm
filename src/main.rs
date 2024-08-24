@@ -26,6 +26,8 @@ use penrose::{
 use std::collections::HashMap;
 use tracing_subscriber::{self, prelude::*};
 
+const WHITE: u32 = 0xffffffff;
+
 fn raw_key_bindings() -> HashMap<String, Box<dyn KeyEventHandler<RustConn>>> {
     let mut raw_bindings = map! {
         map_keys: |k: &str| k.to_string();
@@ -46,9 +48,23 @@ fn raw_key_bindings() -> HashMap<String, Box<dyn KeyEventHandler<RustConn>>> {
         "M-S-Down" => send_layout_message(|| IncMain(-1)),
         "M-S-Right" => send_layout_message(|| ExpandMain),
         "M-S-Left" => send_layout_message(|| ShrinkMain),
+        "M-S-q" => exit(),
+
         "M-p" => spawn("dmenu_run"),
         "M-Return" => spawn("alacritty"),
-        "M-S-q" => exit(),
+        "M-c" => spawn("emacsclient -c"),
+        "M-b" => spawn("thorium"),
+        "M-l" => spawn("xsecurelock"),
+        "M-S-s" => spawn("flameshot gui"),
+        "M-S-c" => spawn("xcolor -s clipboard"),
+        "XF86AudioRaiseVolume" => spawn("pactl set-sink-volume @DEFAULT_SINK@ +5%"),
+        "XF86AudioLowerVolume" => spawn("pactl set-sink-volume @DEFAULT_SINK@ -5%"),
+        "XF86AudioMute" => spawn("pamixer -t"),
+        "XF86MonBrightnessUp" => spawn("light -A 5"),
+        "XF86MonBrightnessDown" => spawn("light -U 5"),
+        "XF86AudioPlay" => spawn("dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause"),
+        "XF86AudioNext" => spawn("dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Next"),
+        "XF86AudioPrev" => spawn("dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Previous"),
     };
 
     for tag in &["1", "2", "3", "4", "5", "6", "7", "8", "9"] {
@@ -96,6 +112,7 @@ fn main() -> Result<()> {
     let key_bindings = parse_keybindings_with_xmodmap(raw_key_bindings())?;
     let config = add_ewmh_hooks(Config {
         default_layouts: layouts(),
+        focused_border: WHITE.into(),
         ..Config::default()
     });
     let wm = WindowManager::new(config, key_bindings, mouse_bindings(), conn)?;
