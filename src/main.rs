@@ -5,13 +5,17 @@ use penrose::{
             floating::{sink_focused, MouseDragHandler, MouseResizeHandler},
             modify_with, send_layout_message, spawn,
         },
-        layout::messages::{ExpandMain, IncMain, ShrinkMain},
+        layout::{
+            messages::{ExpandMain, IncMain, ShrinkMain},
+            transformers::Gaps,
+        },
     },
     core::{
         bindings::{
             click_handler, parse_keybindings_with_xmodmap, KeyEventHandler, MouseEventHandler,
             MouseState,
         },
+        layout::LayoutStack,
         Config, WindowManager,
     },
     map,
@@ -25,8 +29,8 @@ fn raw_key_bindings() -> HashMap<String, Box<dyn KeyEventHandler<RustConn>>> {
     let mut raw_bindings = map! {
         map_keys: |k: &str| k.to_string();
 
-        "M-Left" => modify_with(|cs| cs.focus_down()),
-        "M-Right" => modify_with(|cs| cs.focus_up()),
+        "M-Left" => modify_with(|cs| cs.focus_up()),
+        "M-Right" => modify_with(|cs| cs.focus_down()),
         "M-S-j" => modify_with(|cs| cs.swap_down()),
         "M-S-k" => modify_with(|cs| cs.swap_up()),
         "M-q" => modify_with(|cs| cs.kill_focused()),
@@ -75,6 +79,10 @@ fn mouse_bindings() -> HashMap<MouseState, Box<dyn MouseEventHandler<RustConn>>>
     }
 }
 
+fn layouts() -> LayoutStack {
+    LayoutStack::default().map(|layout| Gaps::wrap(layout, 10, 10))
+}
+
 fn main() -> Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter("info")
@@ -83,7 +91,11 @@ fn main() -> Result<()> {
 
     let conn = RustConn::new()?;
     let key_bindings = parse_keybindings_with_xmodmap(raw_key_bindings())?;
-    let wm = WindowManager::new(Config::default(), key_bindings, mouse_bindings(), conn)?;
+    let config = Config {
+        default_layouts: layouts(),
+        ..Config::default()
+    };
+    let wm = WindowManager::new(config, key_bindings, mouse_bindings(), conn)?;
 
     wm.run()
 }
