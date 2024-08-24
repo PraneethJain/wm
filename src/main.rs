@@ -31,7 +31,9 @@ fn raw_key_bindings() -> HashMap<String, Box<dyn KeyEventHandler<RustConn>>> {
         map_keys: |k: &str| k.to_string();
 
         "M-Left" => modify_with(|cs| cs.focus_up()),
+        "M-Up" => modify_with(|cs| cs.focus_up()),
         "M-Right" => modify_with(|cs| cs.focus_down()),
+        "M-Down" => modify_with(|cs| cs.focus_down()),
         "M-S-j" => modify_with(|cs| cs.swap_down()),
         "M-S-k" => modify_with(|cs| cs.swap_up()),
         "M-q" => modify_with(|cs| cs.kill_focused()),
