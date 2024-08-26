@@ -2,12 +2,15 @@ use penrose::{
     builtin::{
         actions::{
             exit,
-            floating::{sink_focused, MouseDragHandler, MouseResizeHandler},
+            floating::{
+                sink_focused, toggle_floating_focused, MouseDragHandler, MouseResizeHandler,
+            },
             modify_with, send_layout_message, spawn,
         },
         layout::{
             messages::{ExpandMain, IncMain, ShrinkMain},
             transformers::Gaps,
+            MainAndStack, Monocle,
         },
     },
     core::{
@@ -18,8 +21,8 @@ use penrose::{
         layout::LayoutStack,
         Config, WindowManager,
     },
-    extensions::hooks::add_ewmh_hooks,
-    map,
+    extensions::{actions::toggle_fullscreen, hooks::add_ewmh_hooks},
+    map, stack,
     x11rb::RustConn,
     Result,
 };
@@ -36,8 +39,8 @@ fn raw_key_bindings() -> HashMap<String, Box<dyn KeyEventHandler<RustConn>>> {
         "M-Up" => modify_with(|cs| cs.focus_up()),
         "M-Right" => modify_with(|cs| cs.focus_down()),
         "M-Down" => modify_with(|cs| cs.focus_down()),
-        "M-S-j" => modify_with(|cs| cs.swap_down()),
-        "M-S-k" => modify_with(|cs| cs.swap_up()),
+        "M-S-k" => modify_with(|cs| cs.swap_down()),
+        "M-S-j" => modify_with(|cs| cs.swap_up()),
         "M-q" => modify_with(|cs| cs.kill_focused()),
         "M-Tab" => modify_with(|cs| cs.toggle_tag()),
         "M-bracketright" => modify_with(|cs| cs.next_screen()),
@@ -48,11 +51,13 @@ fn raw_key_bindings() -> HashMap<String, Box<dyn KeyEventHandler<RustConn>>> {
         "M-S-Down" => send_layout_message(|| IncMain(-1)),
         "M-S-Right" => send_layout_message(|| ExpandMain),
         "M-S-Left" => send_layout_message(|| ShrinkMain),
+        "M-f" => toggle_fullscreen(),
+        "M-space" => toggle_floating_focused(),
         "M-S-q" => exit(),
 
         "M-p" => spawn("dmenu_run"),
         "M-Return" => spawn("alacritty"),
-        "M-c" => spawn("emacsclient -c"),
+        "M-c" => spawn("emacs"),
         "M-b" => spawn("thorium"),
         "M-l" => spawn("xsecurelock"),
         "M-S-s" => spawn("flameshot gui"),
