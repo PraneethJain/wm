@@ -18,11 +18,16 @@ use penrose::{
             click_handler, parse_keybindings_with_xmodmap, KeyEventHandler, MouseEventHandler,
             MouseState,
         },
+        hooks::EventHook,
         layout::LayoutStack,
-        Config, WindowManager,
+        Config, State, WindowManager,
     },
-    extensions::{actions::toggle_fullscreen, hooks::add_ewmh_hooks},
+    extensions::{
+        actions::{focus_or_spawn, toggle_fullscreen},
+        hooks::add_ewmh_hooks,
+    },
     map, stack,
+    x::{event, Atom, ClientConfig, Prop, XConn, XEvent},
     x11rb::RustConn,
     Result,
 };
@@ -30,6 +35,32 @@ use std::collections::HashMap;
 use tracing_subscriber::{self, prelude::*};
 
 const WHITE: u32 = 0xffffffff;
+
+#[derive(Debug, Clone, Default)]
+pub struct FullScreenHook {
+    fullscreen_border_px: u32,
+}
+
+impl<X: XConn> EventHook<X> for FullScreenHook {
+    fn call(&mut self, event: &XEvent, state: &mut State<X>, x: &X) -> Result<bool> {
+        if let &XEvent::PropertyNotify(event::PropertyEvent { id, .. }) = &event {
+            let net_wm_state = Atom::NetWmState.as_ref();
+            let full_screen = x.intern_atom(Atom::NetWmStateFullscreen.as_ref())?;
+            if let Ok(Some(Prop::Cardinal(vals))) = x.get_prop(*id, net_wm_state) {
+                x.set_client_config(
+                    *id,
+                    &[ClientConfig::BorderPx(if vals.contains(&full_screen) {
+                        self.fullscreen_border_px
+                    } else {
+                        state.config.border_width
+                    })],
+                )?;
+            }
+        }
+
+        Ok(true)
+    }
+}
 
 fn raw_key_bindings() -> HashMap<String, Box<dyn KeyEventHandler<RustConn>>> {
     let mut raw_bindings = map! {
@@ -51,17 +82,19 @@ fn raw_key_bindings() -> HashMap<String, Box<dyn KeyEventHandler<RustConn>>> {
         "M-S-Down" => send_layout_message(|| IncMain(-1)),
         "M-S-Right" => send_layout_message(|| ExpandMain),
         "M-S-Left" => send_layout_message(|| ShrinkMain),
-        "M-f" => toggle_fullscreen(),
+        "M-f" =>   toggle_fullscreen(),
         "M-space" => toggle_floating_focused(),
         "M-S-q" => exit(),
 
         "M-p" => spawn("dmenu_run"),
         "M-Return" => spawn("alacritty"),
-        "M-c" => spawn("emacs"),
         "M-b" => spawn("thorium"),
         "M-l" => spawn("xsecurelock"),
         "M-S-s" => spawn("flameshot gui"),
         "M-S-c" => spawn("xcolor -s clipboard"),
+        "M-c" => focus_or_spawn("emacs", "emacs"),
+        "M-s" => focus_or_spawn("spotify", "spotify"),
+
         "XF86AudioRaiseVolume" => spawn("pactl set-sink-volume @DEFAULT_SINK@ +5%"),
         "XF86AudioLowerVolume" => spawn("pactl set-sink-volume @DEFAULT_SINK@ -5%"),
         "XF86AudioMute" => spawn("pamixer -t"),
@@ -118,6 +151,9 @@ fn main() -> Result<()> {
     let config = add_ewmh_hooks(Config {
         default_layouts: layouts(),
         focused_border: WHITE.into(),
+        event_hook: Some(Box::new(FullScreenHook {
+            fullscreen_border_px: 0,
+        })),
         ..Config::default()
     });
     let wm = WindowManager::new(config, key_bindings, mouse_bindings(), conn)?;
