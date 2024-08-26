@@ -99,7 +99,7 @@ fn mouse_bindings() -> HashMap<MouseState, Box<dyn MouseEventHandler<RustConn>>>
 }
 
 fn layouts() -> LayoutStack {
-    LayoutStack::default().map(|layout| Gaps::wrap(layout, 10, 10))
+    stack!(MainAndStack::boxed_default(), Monocle::boxed()).map(|layout| Gaps::wrap(layout, 10, 10))
 }
 
 fn main() -> Result<()> {
