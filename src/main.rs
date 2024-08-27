@@ -26,7 +26,7 @@ use penrose::{
         actions::{focus_or_spawn, toggle_fullscreen},
         hooks::add_ewmh_hooks,
     },
-    map, stack,
+    map, stack, util,
     x::{event, Atom, ClientConfig, Prop, XConn, XEvent},
     x11rb::RustConn,
     Result,
@@ -56,6 +56,21 @@ impl<X: XConn> EventHook<X> for FullScreenHook {
                     })],
                 )?;
             }
+        }
+
+        Ok(true)
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct MonitorHook {
+    wallpaper_path: String,
+}
+
+impl<X: XConn> EventHook<X> for MonitorHook {
+    fn call(&mut self, event: &XEvent, _: &mut State<X>, _: &X) -> Result<bool> {
+        if let &XEvent::RandrNotify = &event {
+            util::spawn(format!("feh --bg-max {} --no-fehbg", self.wallpaper_path))?;
         }
 
         Ok(true)
@@ -148,13 +163,16 @@ fn main() -> Result<()> {
 
     let conn = RustConn::new()?;
     let key_bindings = parse_keybindings_with_xmodmap(raw_key_bindings())?;
-    let config = add_ewmh_hooks(Config {
+    let mut config = add_ewmh_hooks(Config {
         default_layouts: layouts(),
         focused_border: WHITE.into(),
         event_hook: Some(Box::new(FullScreenHook {
             fullscreen_border_px: 0,
         })),
         ..Config::default()
+    });
+    config.compose_or_set_event_hook(MonitorHook {
+        wallpaper_path: "/home/praneeth/Pictures/wall4.jpg".to_string(),
     });
     let wm = WindowManager::new(config, key_bindings, mouse_bindings(), conn)?;
 
