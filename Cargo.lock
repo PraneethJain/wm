@@ -140,7 +140,8 @@ checksum = "b15813163c1d831bf4a13c3610c05c0d03b39feb07f7e09fa234dac9b15aaf39"
 [[package]]
 name = "penrose"
 version = "0.3.6"
-source = "git+https://github.com/sminez/penrose.git#ab9eeb6e8256a45e1a5f4bbe3af2eecc4993d518"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b55d64d68a6e8f22312da25b54f6422dc937951b533c1e84890d372799473ac2"
 dependencies = [
  "anymap",
  "bitflags",
@@ -155,17 +156,10 @@ dependencies = [
 [[package]]
 name = "penrose_keysyms"
 version = "0.3.6"
-source = "git+https://github.com/sminez/penrose.git#ab9eeb6e8256a45e1a5f4bbe3af2eecc4993d518"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2860cbcb012d62ef5bcd85a78c333cc6217bbfad141d10aff3c0c2faee5d0ff2"
 dependencies = [
  "strum",
-]
-
-[[package]]
-name = "picowm"
-version = "0.1.0"
-dependencies = [
- "penrose",
- "tracing-subscriber",
 ]
 
 [[package]]
@@ -577,6 +571,14 @@ name = "windows_x86_64_msvc"
 version = "0.52.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "589f6da84c646204747d1270a2a5661ea66ed1cced2631d546fdfb155959f9ec"
+
+[[package]]
+name = "wm"
+version = "0.1.0"
+dependencies = [
+ "penrose",
+ "tracing-subscriber",
+]
 
 [[package]]
 name = "x11rb"
