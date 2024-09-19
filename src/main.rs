@@ -91,6 +91,13 @@ fn raw_key_bindings() -> HashMap<String, Box<dyn KeyEventHandler<RustConn>>> {
         "M-Tab" => modify_with(|cs| cs.toggle_tag()),
         "M-bracketright" => modify_with(|cs| cs.next_screen()),
         "M-bracketleft" => modify_with(|cs| cs.previous_screen()),
+        "M-S-Tab" => modify_with(|cs| {
+            let focussed_screen_index = cs.current_screen().index();
+            let unfocussed_screens = cs.screens().filter(|s| s.index() != focussed_screen_index).collect::<Vec<_>>();
+            if let Some(unfocussed_screen) = unfocussed_screens.first() {
+               cs.pull_tag_to_screen(cs.tag_for_screen(unfocussed_screen.index()).unwrap().to_string());
+            }
+        }),
         "M-grave" => modify_with(|cs| cs.next_layout()),
         "M-S-grave" => modify_with(|cs| cs.previous_layout()),
         "M-S-Up" => send_layout_message(|| IncMain(1)),
