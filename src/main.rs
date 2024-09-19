@@ -102,12 +102,14 @@ fn raw_key_bindings() -> HashMap<String, Box<dyn KeyEventHandler<RustConn>>> {
         "M-S-q" => exit(),
 
         "M-p" => spawn("dmenu_run"),
-        "M-Return" => spawn("alacritty"),
+        "M-c" => spawn("emacsclient -c"),
+        "M-Return" => spawn("starteshell"),
+        "M-d" => spawn("startdired"),
         "M-b" => spawn("thorium"),
+        "M-v" => spawn("code"),
         "M-l" => spawn("xsecurelock"),
         "M-S-s" => spawn("flameshot gui"),
         "M-S-c" => spawn("xcolor -s clipboard"),
-        "M-c" => focus_or_spawn("emacs", "emacs"),
         "M-s" => focus_or_spawn("spotify", "spotify"),
 
         "XF86AudioRaiseVolume" => spawn("pactl set-sink-volume @DEFAULT_SINK@ +5%"),
@@ -172,7 +174,7 @@ fn main() -> Result<()> {
         ..Config::default()
     });
     config.compose_or_set_event_hook(MonitorHook {
-        wallpaper_path: "/home/praneeth/Pictures/wall4.jpg".to_string(),
+        wallpaper_path: "/home/praneeth/Pictures/wall5.jpg".to_string(),
     });
     let wm = WindowManager::new(config, key_bindings, mouse_bindings(), conn)?;
 
