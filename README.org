@@ -1,0 +1,5 @@
+#+title: Window Manager
+
+A simple minimalistic window manager for X, written using [[https://github.com/sminez/penrose][penrose]].
+
+*Note*: This is meant for personal use, the code contains hardcoded paths and assumes some programs are installed.
