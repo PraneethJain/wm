@@ -116,6 +116,7 @@ fn raw_key_bindings() -> HashMap<String, Box<dyn KeyEventHandler<RustConn>>> {
         "M-v" => spawn("code"),
         "M-l" => spawn("xsecurelock"),
         "M-S-s" => spawn("flameshot gui"),
+        "Print" => spawn("flameshot screen"),
         "M-S-c" => spawn("xcolor -s clipboard"),
         "M-s" => focus_or_spawn("spotify", "spotify"),
 
