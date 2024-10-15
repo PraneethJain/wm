@@ -140,8 +140,7 @@ checksum = "b15813163c1d831bf4a13c3610c05c0d03b39feb07f7e09fa234dac9b15aaf39"
 [[package]]
 name = "penrose"
 version = "0.3.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b55d64d68a6e8f22312da25b54f6422dc937951b533c1e84890d372799473ac2"
+source = "git+https://github.com/sminez/penrose?rev=a0f3669282bfb8a0eb926addc8187513fcfdab6d#a0f3669282bfb8a0eb926addc8187513fcfdab6d"
 dependencies = [
  "anymap",
  "bitflags",
@@ -156,8 +155,7 @@ dependencies = [
 [[package]]
 name = "penrose_keysyms"
 version = "0.3.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2860cbcb012d62ef5bcd85a78c333cc6217bbfad141d10aff3c0c2faee5d0ff2"
+source = "git+https://github.com/sminez/penrose?rev=a0f3669282bfb8a0eb926addc8187513fcfdab6d#a0f3669282bfb8a0eb926addc8187513fcfdab6d"
 dependencies = [
  "strum",
 ]

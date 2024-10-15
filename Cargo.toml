@@ -4,5 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-penrose = "0.3.6"
+penrose = { git = "https://github.com/sminez/penrose", rev = "a0f3669282bfb8a0eb926addc8187513fcfdab6d" }
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }

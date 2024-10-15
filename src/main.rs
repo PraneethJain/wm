@@ -27,7 +27,7 @@ use penrose::{
         hooks::add_ewmh_hooks,
     },
     map, stack, util,
-    x::{event, Atom, ClientConfig, Prop, XConn, XEvent},
+    x::{XConn, XEvent},
     x11rb::RustConn,
     Result,
 };
@@ -35,32 +35,6 @@ use std::collections::HashMap;
 use tracing_subscriber::{self, prelude::*};
 
 const WHITE: u32 = 0xffffffff;
-
-#[derive(Debug, Clone, Default)]
-pub struct FullScreenHook {
-    fullscreen_border_px: u32,
-}
-
-impl<X: XConn> EventHook<X> for FullScreenHook {
-    fn call(&mut self, event: &XEvent, state: &mut State<X>, x: &X) -> Result<bool> {
-        if let &XEvent::PropertyNotify(event::PropertyEvent { id, .. }) = &event {
-            let net_wm_state = Atom::NetWmState.as_ref();
-            let full_screen = x.intern_atom(Atom::NetWmStateFullscreen.as_ref())?;
-            if let Ok(Some(Prop::Cardinal(vals))) = x.get_prop(*id, net_wm_state) {
-                x.set_client_config(
-                    *id,
-                    &[ClientConfig::BorderPx(if vals.contains(&full_screen) {
-                        self.fullscreen_border_px
-                    } else {
-                        state.config.border_width
-                    })],
-                )?;
-            }
-        }
-
-        Ok(true)
-    }
-}
 
 #[derive(Debug, Clone, Default)]
 pub struct MonitorHook {
@@ -109,8 +83,8 @@ fn raw_key_bindings() -> HashMap<String, Box<dyn KeyEventHandler<RustConn>>> {
         "M-S-q" => exit(),
 
         "M-p" => spawn("dmenu_run"),
-        "M-c" => spawn("emacsclient -c"),
-        "M-Return" => spawn("starteshell"),
+        "M-c" => focus_or_spawn("emacs", "emacs"),
+        "M-Return" => spawn("alacritty"),
         "M-d" => spawn("startdired"),
         "M-b" => spawn("thorium"),
         "M-v" => spawn("code"),
@@ -176,9 +150,6 @@ fn main() -> Result<()> {
     let mut config = add_ewmh_hooks(Config {
         default_layouts: layouts(),
         focused_border: WHITE.into(),
-        event_hook: Some(Box::new(FullScreenHook {
-            fullscreen_border_px: 0,
-        })),
         ..Config::default()
     });
     config.compose_or_set_event_hook(MonitorHook {
